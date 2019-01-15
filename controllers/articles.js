@@ -1,10 +1,16 @@
 const connection = require('../connection');
 
 exports.getArticlesByTopic = (req, res, next) => {
-  const offset = !req.query.p ? 0 : (req.query.p - 1) * 10;
-  const limit = !req.query.limit ? 10 : req.query.limit;
-  const sortBy = !req.query.sort_by ? 'created_at' : req.query.sort_by;
-  const sortOrder = !req.query.sort_ascending ? 'asc' : 'desc';
+  // const offset = !req.query.p ? 0 : (req.query.p - 1) * 10;
+  // const limit = !req.query.limit ? 10 : req.query.limit;
+  // const sortBy = !req.query.sort_by ? 'created_at' : req.query.sort_by;
+  // const sortOrder = !req.query.sort ? 'asc' : 'desc';
+
+   const offset = !req.query.p ? 0 : (req.query.p - 1) * 10;
+   const limit = req.query.limit || 10; 
+   const sortBy = req.query.sort_by || 'created_at';
+   const sortOrder = req.query.sort || 'desc';
+
 
   connection
     .select('articles.article_id', 'articles.title', 'articles.votes', 'articles.topic', 'articles.username as author', 'articles.created_at')
@@ -19,7 +25,7 @@ exports.getArticlesByTopic = (req, res, next) => {
     .then((articles) => {
       if (!articles.length) {
         return Promise.reject({
-          msg: 'no article found',
+          message: 'no article found',
           code: 404,
         });
       }

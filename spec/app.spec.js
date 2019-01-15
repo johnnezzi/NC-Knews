@@ -35,7 +35,7 @@ describe('/api', () => {
         });
       }));
 
-    it('POST status:400 and responds with "Bad Request, Invalid object structure provided" error message', () => request.post('/api/topics')
+    it('POST status:400 and responds with "Bad Request, Invalid object structure provided" when wrong key is sent', () => request.post('/api/topics')
       .send({
         description: 'The Man Dem',
         snail: 'john',
@@ -44,7 +44,7 @@ describe('/api', () => {
       .then((res) => {
         expect(res.body.message).to.equal('Bad Request, Invalid object structure provided');
       }));
-    it('POST status:400 and responds with "Bad Request, duplicate value provided" error message', () => request.post('/api/topics')
+    it('POST status:400 and responds with "Bad Request, duplicate value provided" ewhen duplicate value is sent', () => request.post('/api/topics')
       .send({
         description: 'The Man Dem',
         slug: 'mitch',
@@ -53,21 +53,61 @@ describe('/api', () => {
       .then((res) => {
         expect(res.body.message).to.equal('Bad Request, Duplicate value supplied');
       }));
-    it('GET status:200 and responds with an array of topics by article', () => request.get('/api/topics/cats/articles')
-      .expect(200)
-      .then(({
-        body
-      }) => {
-        expect(body).to.have.lengthOf(1);
-        expect(body[0].topic).to.eql('cats');
-      }));
+
+    describe('/api/topics/:topic/articles', () => {
       it('GET status:200 and responds with an array of topics by article', () => request.get('/api/topics/cats/articles')
         .expect(200)
         .then(({
-          body
+          body,
         }) => {
           expect(body).to.have.lengthOf(1);
           expect(body[0].topic).to.eql('cats');
+          expect(body[0]).to.have.all.keys('author', 'title', 'article_id', 'votes', 'comment_count', 'created_at', 'topic');
         }));
+      it('GET status:400 and responds with "no article found" if there is no article', () => request.get('/api/topics/hams/articles')
+        .expect(404)
+        .then(({
+          body,
+        }) => {
+          expect(body.message).to.eql('no article found');
+        }));
+      it('GET status:200 and responds with default settings of limit=10, sort_by=date,order=desc', () => request.get('/api/topics/mitch/articles')
+        .expect(200)
+        .then(({
+          body,
+        }) => {
+          expect(body).to.have.lengthOf(10);
+          expect(body[0].article_id).to.eql(1);
+        }));
+      it('GET status:200 and takes a limt query and responds with appropriate number of articles', () => request.get('/api/topics/mitch/articles?limit=5')
+        .expect(200)
+        .then(({
+          body,
+        }) => {
+          expect(body).to.have.lengthOf(5);
+        }));
+      it('GET status:200 and takes a sort_by query and responds articles sorted by that query', () => request.get('/api/topics/mitch/articles?sort_by=article_id')
+        .expect(200)
+        .then(({
+          body,
+        }) => {
+          expect(body[0].article_id).to.eql(12);
+        }));
+      it('GET status:200 and takes a p query and responds articles paginated by that query', () => request.get('/api/topics/mitch/articles?p=2')
+        .expect(200)
+        .then(({
+          body,
+        }) => {
+          expect(body[0].article_id).to.eql(12);
+          expect(body).to.have.lengthOf(1);
+        }));
+      it('GET status:200 and takes a order query and responds articles ordered by that query', () => request.get('/api/topics/mitch/articles?sort=asc')
+        .expect(200)
+        .then(({
+          body,
+        }) => {
+          expect(body[0].article_id).to.eql(12);
+        }));
+    });
   });
 });
