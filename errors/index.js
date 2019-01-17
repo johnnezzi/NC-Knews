@@ -1,5 +1,4 @@
 exports.handle400 = (err, req, res, next) => {
-  // console.log(err)
   const codes = {
     42703: 'Bad Request, Invalid object structure provided',
   };
@@ -12,7 +11,7 @@ exports.handle400 = (err, req, res, next) => {
 
 exports.handle404 = (err, req, res, next) => {
   if (err.code === 404) res.status(404).send({
-    message: err.message,
+    message: err.msg || err.message,
   });
   else next(err);
 };
@@ -29,8 +28,8 @@ exports.handle422 = (err, req, res, next) => {
   } else next(err);
 };
 
-exports.handle405 = (err, req, res) => {
-  if (err.code === 405) return res.status(405).send({
-    message: err.message,
+exports.handle405 = (req, res, next) => {
+  res.status(405).send({
+    message: 'Invalid method for this endpoint',
   });
 };

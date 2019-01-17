@@ -15,6 +15,7 @@ topicsRouter
 topicsRouter
   .route('/:topic/articles')
   .get(getArticlesByTopic)
-  .post(postArticlesToTopic);
+  .post(postArticlesToTopic)
+  .all(handle405);
 
 module.exports = topicsRouter;

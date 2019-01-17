@@ -6,25 +6,34 @@ const {
   getArticles, getArticleById, patchArticle, deleteArticle,
 } = require('../controllers/articles');
 
+const {
+  handle405,
+} = require('../errors');
+
 articlesRouter
   .route('/')
-  .get(getArticles);
+  .get(getArticles)
+  .all(handle405);
 
 articlesRouter
   .route('/:article_id')
   .get(getArticleById)
   .patch(patchArticle)
-  .delete(deleteArticle);
+  .delete(deleteArticle)
+  .all(handle405);
+  
 
 articlesRouter
   .route('/:article_id/comments/')
   .get(getCommentsByArticle)
   .post(postCommentToArticle)
-  .patch(patchComment);
+  .patch(patchComment)
+  .all(handle405);
 
 articlesRouter
   .route('/:article_id/comments/:comments_id')
   .patch(patchComment)
-  .delete(deleteComment);
+  .delete(deleteComment)
+  .all(handle405);
 
 module.exports = articlesRouter;

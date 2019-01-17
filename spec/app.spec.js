@@ -45,12 +45,35 @@ describe('/api', () => {
         expect(res.body.message).to.equal('Bad Request, Invalid object structure provided');
       }));
 
-    it.only('PUT/PATCH/DELETE status:405 and handles invalid requests', () => {
-      const invalidMethods = ['patch', 'delete', 'put'];
-      const invalidRequests = invalidMethods.map(invalidMethod => request[invalidMethod](('/api/topics')));
-      return Promise.all(invalidRequests)
-        .then(body => console.log(body));
-    });
+    it('POST status:422 and responds with "Bad Request, Duplicate key violation" when duplicate key is sent', () => request.post('/api/topics')
+      .send({
+        description: 'The Man Dem',
+        slug: 'mitch',
+      })
+      .expect(422)
+      .then(({
+        body,
+      }) => {
+        expect(body.message).to.equal('Bad Request, Duplicate key violation');
+      }));
+
+    it('DELETE status:405 and responds with "Invalid method for this endpoint"', () => request.delete('/api/topics')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
+
+    it('PUT status:405 and responds with "Invalid method for this endpoint"', () => request.put('/api/topics')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
+
+    it('PATCH status:405 and responds with "Invalid method for this endpoint"', () => request.patch('/api/topics')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
   });
 
   describe('/api/topics/:topic/articles', () => {
@@ -63,6 +86,7 @@ describe('/api', () => {
         expect(body[0].topic).to.eql('cats');
         expect(body[0]).to.have.all.keys('author', 'title', 'article_id', 'votes', 'comment_count', 'created_at', 'topic');
       }));
+
 
     it('GET status:404 and responds with "no article found" if there is no article', () => request.get('/api/topics/hams/articles')
       .expect(404)
@@ -144,7 +168,7 @@ describe('/api', () => {
         expect(body.message).to.eql('Bad Request, Invalid object structure provided');
       }));
 
-    it('POST status:400 and responds with error "Bad Request, Username does not exist" when sent a user not in users table', () => request.post('/api/topics/mitch/articles')
+    it('POST status:422 and responds with error "Bad Request, Username does not exist" when sent a user not in users table', () => request.post('/api/topics/mitch/articles')
       .send({
         title: 'Living in the shadow of a great man',
         body: 'Playboy playboy hit me on my face time',
@@ -177,6 +201,58 @@ describe('/api', () => {
         expect(body).to.have.lengthOf(10);
         expect(body[0].article_id).to.eql(1);
       }));
+
+    it('GET status:200 and takes a limit query and responds with appropriate number of articles', () => request.get('/api/articles?limit=5')
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body).to.have.lengthOf(5);
+      }));
+
+    it('GET status:200 and takes a sort_by query and responds articles sorted by that query', () => request.get('/api/articles?sort_by=article_id')
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body[0].article_id).to.eql(12);
+      }));
+
+    it('GET status:200 and takes a p query and responds articles paginated by that query', () => request.get('/api/articles?p=2')
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body[0].article_id).to.eql(11);
+        expect(body).to.have.lengthOf(2);
+      }));
+
+    it('GET status:200 and takes a order query and responds articles ordered by that query', () => request.get('/api/articles?sort_order=asc')
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body[0].article_id).to.eql(12);
+      }));
+
+
+    it('DELETE status:405 and responds with "Invalid method for this endpoint" ', () => request.delete('/api/articles')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
+
+    it('PUT status:405 and responds with "Invalid method for this endpoint" ', () => request.put('/api/articles')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
+
+    it('PATCH status:405 and responds with "Invalid method for this endpoint" ', () => request.patch('/api/articles')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
   });
 
   describe('/api/articles/:article_id', () => {
@@ -197,7 +273,7 @@ describe('/api', () => {
         expect(body.message).to.eql('No article found');
       }));
 
-    it('PATCH status:201 raccepts a patch requests and amends the database accordingly', () => request.patch('/api/articles/1')
+    it('PATCH status:202 accepts a patch requests and amends the database accordingly', () => request.patch('/api/articles/1')
       .send({
         inc_votes: 3,
       })
@@ -212,7 +288,14 @@ describe('/api', () => {
       .expect(204)
       .then(() => request.get('/api/articles/2')
         .expect(404)));
+
+    it('PUT status:405 and responds with "Invalid method for this endpoint" ', () => request.put('/api/articles/2')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
   });
+
   describe('/api/articles/:article_id/comments', () => {
     it('GET Status:200 responds and an array of comments for queried article', () => request.get('/api/articles/9/comments')
       .expect(200)
@@ -222,6 +305,14 @@ describe('/api', () => {
         expect(body.comments[0].body).to.eql('Oh, I\'ve got compassion running out of my nose, pal! I\'m the Sultan of Sentiment!');
         expect(body.comments).to.have.a.lengthOf(2);
         expect(body.comments[0]).to.have.all.keys('comments_id', 'votes', 'created_at', 'author', 'body');
+      }));
+
+    it('GET Status:404 responds with "no article found" when passed an invalid article id', () => request.get('/api/articles/99/comments')
+      .expect(404)
+      .then(({
+        body,
+      }) => {
+        expect(body.message).to.eql('no article found')
       }));
 
     it('GET status:200 and responds with default settings of limit=10, sort_by=date,order=desc', () => request.get('/api/articles/1/comments')
@@ -280,7 +371,19 @@ describe('/api', () => {
         expect(body.comment).to.have.all.keys('username', 'body', 'article_id', 'comments_id', 'created_at', 'votes');
       }));
 
-    it('PATCH status:201 accepts a patch requests and amends the database accordingly', () => request.patch('/api/articles/9/comments/1')
+    it('POST status:422 when adding a comment with an invalid username', () => request.post('/api/articles/9/comments')
+      .send({
+        username: 'John',
+        body: 'Im a social commententator',
+      })
+      .expect(422)
+      .then(({
+        body,
+      }) => {
+        expect(body.message).to.eql('Bad Request, Username does not exist');
+      }));
+
+    it('PATCH status:202 accepts a patch requests and amends the database accordingly', () => request.patch('/api/articles/9/comments/1')
       .send({
         inc_votes: 4,
       })
@@ -292,8 +395,12 @@ describe('/api', () => {
       }));
     it('DELETE status:204 accepts a delete requests and deletes the article from the databse', () => request.delete('/api/articles/9/comments/1')
       .expect(204)
-      .then(() => request.get('/api/articles/9/comments/1')
-        .expect(404)));
+      .then(() => request.get('/api/articles/9/comments'))
+      .then(({
+        body,
+      }) => {
+        expect(body.comments).to.have.lengthOf(1);
+      }));
   });
 
   describe('/api/users', () => {
@@ -303,6 +410,24 @@ describe('/api', () => {
         body,
       }) => {
         expect(body.users).to.have.lengthOf(3);
+      }));
+
+    it('DELETE status:405 and responds with "Invalid method for this endpoint"', () => request.delete('/api/users')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
+
+    it('PUT status:405 and responds with "Invalid method for this endpoint"', () => request.put('/api/users')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
+
+    it('PATCH status:405 and responds with "Invalid method for this endpoint"', () => request.patch('/api/users')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
       }));
   });
 
@@ -315,15 +440,59 @@ describe('/api', () => {
         expect(body.user.username).to.have.eql('icellusedkars');
         expect(body.user).to.have.all.keys('username', 'avatar_url', 'name');
       }));
+
+    it('GET status:404 errors when user is not found', () => request.get('/api/users/john')
+      .expect(404)
+      .then(({
+        body,
+      }) => {
+        expect(body.message).to.eql('no user found');
+      }));
+
+    it('DELETE status:405 and responds with "Invalid method for this endpoint"', () => request.delete('/api/users/icellusedkars')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
+
+    it('PUT status:405 and responds with "Invalid method for this endpoint"', () => request.put('/api/users/icellusedkars')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
+
+    it('PATCH status:405 and responds with "Invalid method for this endpoint"', () => request.patch('/api/users/icellusedkars')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
   });
 
-  describe('/api/', () => {
+  describe('/api', () => {
     it('GET status:200 responds with an object containing the endpoints info', () => request.get('/api')
       .expect(200)
       .then(({
         body,
       }) => {
         expect(body).to.have.all.keys('endPointsData');
+      }));
+
+    it('DELETE status:405 and responds with "Invalid method for this endpoint"', () => request.delete('/api')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
+
+    it('PUT status:405 and responds with "Invalid method for this endpoint"', () => request.put('/api')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
+      }));
+
+    it('PATCH status:405 and responds with "Invalid method for this endpoint"', () => request.patch('/api')
+      .expect(405)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid method for this endpoint');
       }));
   });
 });

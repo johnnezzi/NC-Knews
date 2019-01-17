@@ -38,7 +38,6 @@ exports.postCommentToArticle = (req, res, next) => {
 };
 
 exports.patchComment = (req, res, next) => {
-  console.log(req.params)
   connection('comments')
     .where('comments_id', '=', req.params.comments_id)
     .increment('votes', req.body.inc_votes).returning('*')
