@@ -44,6 +44,13 @@ describe('/api', () => {
       .then((res) => {
         expect(res.body.message).to.equal('Bad Request, Invalid object structure provided');
       }));
+
+    it.only('PUT/PATCH/DELETE status:405 and handles invalid requests', () => {
+      const invalidMethods = ['patch', 'delete', 'put'];
+      const invalidRequests = invalidMethods.map(invalidMethod => request[invalidMethod](('/api/topics')));
+      return Promise.all(invalidRequests)
+        .then(body => console.log(body));
+    });
   });
 
   describe('/api/topics/:topic/articles', () => {
@@ -212,7 +219,6 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        console.log(body);
         expect(body.comments[0].body).to.eql('Oh, I\'ve got compassion running out of my nose, pal! I\'m the Sultan of Sentiment!');
         expect(body.comments).to.have.a.lengthOf(2);
         expect(body.comments[0]).to.have.all.keys('comments_id', 'votes', 'created_at', 'author', 'body');
@@ -311,15 +317,13 @@ describe('/api', () => {
       }));
   });
 
-  // describe('/api/', () => {
-  //   it('GET status:200 responds with an an array of user objects', () => request.get('/api')
-  //     .expect(200)
-  //     .then(({
-  //       body,
-  //     }) => {
-  //       console.log(body);
-  //       // expect(body.user.username).to.have.eql('icellusedkars');
-  //       // expect(body.user).to.have.all.keys('username', 'avatar_url', 'name');
-  //     }));
-  // });
+  describe('/api/', () => {
+    it('GET status:200 responds with an object containing the endpoints info', () => request.get('/api')
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body).to.have.all.keys('endPointsData');
+      }));
+  });
 });

@@ -4,11 +4,13 @@ const {
   getArticlesByTopic,
   postArticlesToTopic,
 } = require('../controllers/articles');
+const { handle405 } = require('../errors');
 
 topicsRouter
   .route('/')
   .get(getTopics)
-  .post(postTopic);
+  .post(postTopic)
+  .all(handle405);
 
 topicsRouter
   .route('/:topic/articles')

@@ -28,3 +28,9 @@ exports.handle422 = (err, req, res, next) => {
     });
   } else next(err);
 };
+
+exports.handle405 = (err, req, res) => {
+  if (err.code === 405) return res.status(405).send({
+    message: err.message,
+  });
+};
