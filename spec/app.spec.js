@@ -82,9 +82,9 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body).to.have.lengthOf(1);
-        expect(body[0].topic).to.eql('cats');
-        expect(body[0]).to.have.all.keys('author', 'title', 'article_id', 'votes', 'comment_count', 'created_at', 'topic');
+        expect(body.articles).to.have.lengthOf(1);
+        expect(body.articles[0].topic).to.eql('cats');
+        expect(body.articles[0]).to.have.all.keys('author', 'title', 'article_id', 'votes', 'comment_count', 'created_at', 'topic');
       }));
 
 
@@ -101,8 +101,8 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body).to.have.lengthOf(10);
-        expect(body[0].article_id).to.eql(1);
+        expect(body.articles).to.have.lengthOf(10);
+        expect(body.articles[0].article_id).to.eql(1);
       }));
 
     it('GET status:200 and takes a limt query and responds with appropriate number of articles', () => request.get('/api/topics/mitch/articles?limit=5')
@@ -110,7 +110,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body).to.have.lengthOf(5);
+        expect(body.articles).to.have.lengthOf(5);
       }));
 
     it('GET status:200 and takes a sort_by query and responds articles sorted by that query', () => request.get('/api/topics/mitch/articles?sort_by=article_id')
@@ -118,7 +118,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body[0].article_id).to.eql(12);
+        expect(body.articles[0].article_id).to.eql(12);
       }));
 
     it('GET status:200 and takes a p query and responds articles paginated by that query', () => request.get('/api/topics/mitch/articles?p=2')
@@ -126,8 +126,8 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body[0].article_id).to.eql(12);
-        expect(body).to.have.lengthOf(1);
+        expect(body.articles[0].article_id).to.eql(12);
+        expect(body.articles).to.have.lengthOf(1);
       }));
 
     it('GET status:200 and takes a order query and responds articles ordered by that query', () => request.get('/api/topics/mitch/articles?sort_order=asc')
@@ -135,7 +135,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body[0].article_id).to.eql(12);
+        expect(body.articles[0].article_id).to.eql(12);
       }));
 
     it('POST status:201 and responds with added data', () => request.post('/api/topics/mitch/articles')
@@ -188,9 +188,9 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body).to.have.lengthOf(10);
-        expect(body[0].title).to.eql('Living in the shadow of a great man');
-        expect(body[0]).to.have.all.keys('author', 'title', 'article_id', 'votes', 'comment_count', 'created_at', 'topic');
+        expect(body.articles).to.have.lengthOf(10);
+        expect(body.articles[0].title).to.eql('Living in the shadow of a great man');
+        expect(body.articles[0]).to.have.all.keys('author', 'title', 'article_id', 'votes', 'comment_count', 'created_at', 'topic');
       }));
 
     it('GET status:200 and responds with default settings of limit=10, sort_by=date,order=desc', () => request.get('/api/articles')
@@ -198,8 +198,8 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body).to.have.lengthOf(10);
-        expect(body[0].article_id).to.eql(1);
+        expect(body.articles).to.have.lengthOf(10);
+        expect(body.articles[0].article_id).to.eql(1);
       }));
 
     it('GET status:200 and takes a limit query and responds with appropriate number of articles', () => request.get('/api/articles?limit=5')
@@ -207,7 +207,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body).to.have.lengthOf(5);
+        expect(body.articles).to.have.lengthOf(5);
       }));
 
     it('GET status:200 and takes a sort_by query and responds articles sorted by that query', () => request.get('/api/articles?sort_by=article_id')
@@ -215,7 +215,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body[0].article_id).to.eql(12);
+        expect(body.articles[0].article_id).to.eql(12);
       }));
 
     it('GET status:200 and takes a p query and responds articles paginated by that query', () => request.get('/api/articles?p=2')
@@ -223,8 +223,8 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body[0].article_id).to.eql(11);
-        expect(body).to.have.lengthOf(2);
+        expect(body.articles[0].article_id).to.eql(11);
+        expect(body.articles).to.have.lengthOf(2);
       }));
 
     it('GET status:200 and takes a order query and responds articles ordered by that query', () => request.get('/api/articles?sort_order=asc')
@@ -232,7 +232,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body[0].article_id).to.eql(12);
+        expect(body.articles[0].article_id).to.eql(12);
       }));
 
 
@@ -261,8 +261,8 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body).to.have.lengthOf(1);
-        expect(body[0]).to.have.all.keys('article_id', 'author', 'title', 'votes', 'body', 'comment_count', 'created_at', 'topic');
+        expect(body.article).to.have.lengthOf(1);
+        expect(body.article[0]).to.have.all.keys('article_id', 'author', 'title', 'votes', 'body', 'comment_count', 'created_at', 'topic');
       }));
 
     it('GET status:404 responds with "No article found" when sent invalid article_id ', () => request.get('/api/articles/400')
@@ -281,7 +281,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body.votes).to.eql(103);
+        expect(body.article.votes).to.eql(103);
       }));
 
     it('DELETE status:204 accepts a delete requests and deletes the article from the databse', () => request.delete('/api/articles/2')
@@ -312,7 +312,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body.message).to.eql('no article found')
+        expect(body.message).to.eql('no article found');
       }));
 
     it('GET status:200 and responds with default settings of limit=10, sort_by=date,order=desc', () => request.get('/api/articles/1/comments')

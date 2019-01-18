@@ -21,7 +21,7 @@ articlesRouter
   .patch(patchArticle)
   .delete(deleteArticle)
   .all(handle405);
-  
+
 
 articlesRouter
   .route('/:article_id/comments/')

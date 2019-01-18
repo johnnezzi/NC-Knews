@@ -12,7 +12,7 @@ exports.getArticles = (req, res, next) => {
     .limit(limit)
     .orderBy(sort_by, sort_order)
     .offset(offset)
-    .then(articles => res.status(200).send(articles));
+    .then(articles => res.status(200).send({ articles }));
 };
 
 exports.getArticlesByTopic = (req, res, next) => {
@@ -35,7 +35,7 @@ exports.getArticlesByTopic = (req, res, next) => {
           code: 404,
         });
       }
-      res.status(200).send(articles);
+      res.status(200).send({ articles });
     })
     .catch(next);
 };
@@ -55,7 +55,7 @@ exports.getArticleById = (req, res, next) => {
           code: 404,
           message: 'No article found',
         });
-      } res.status(200).send(article);
+      } res.status(200).send({ article });
     })
     .catch(next);
 };
@@ -77,9 +77,9 @@ exports.patchArticle = (req, res, next) => {
   connection('articles')
     .where('article_id', '=', req.params.article_id)
     .increment('votes', req.body.inc_votes).returning('*')
-    .then(([article]) => res.status(202).send(
+    .then(([article]) => res.status(202).send({
       article,
-    ))
+    }))
     .catch(next);
 };
 

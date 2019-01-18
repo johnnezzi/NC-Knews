@@ -44,7 +44,7 @@ exports.patchComment = (req, res, next) => {
     .then(([comment]) => res.status(202).send(
       {
         comment,
-      }
+      },
     ))
     .catch(next);
 };

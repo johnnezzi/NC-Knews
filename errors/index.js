@@ -33,3 +33,9 @@ exports.handle405 = (req, res, next) => {
     message: 'Invalid method for this endpoint',
   });
 };
+
+exports.handle500 = (req, res, next) => {
+  res.status(500).send({
+    message: 'Internal Server Error',
+  });
+};
