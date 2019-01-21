@@ -376,12 +376,13 @@ describe('/api', () => {
       }));
 
     it('PATCH status:200s no body responds with an unmodified article', () => request.patch('/api/articles/1')
-      .send()
+      .send({
+      })
       .expect(200)
       .then(({
         body,
       }) => {
-        expect(body.message).to.eql('Invalid input format');
+        expect(body.article.votes).to.eql(100);
       }));
 
     it('DELETE status:204 accepts a delete requests and deletes the article from the databse', () => request.delete('/api/articles/2')
@@ -535,7 +536,7 @@ describe('/api', () => {
     //   .send({
     //     username: 'icellusedkars',
     //    dockey: 'monckey',
-        
+
     //   })
     //   .expect(400)
     //   .then(({
@@ -555,16 +556,38 @@ describe('/api', () => {
         expect(body.comment.votes).to.eql(20);
       }));
 
-    // it.only('PATCH responds with 404 if non-existent comment id is used:', () => request.patch('/api/articles/9/comments/1000')
-    //   .send({
-    //     inc_votes: 4,
-    //   })
-    //   .expect(200)
-    //   .then(({
-    //     body,
-    //   }) => {
-    //     expect(body.comment.votes).to.eql(20);
-    //   }));
+    it('PATCH status:200s no body responds with an unmodified comment', () => request.patch('/api/articles/9/comments/1')
+      .send({})
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body.comment.votes).to.eql(16);
+      }));
+
+    it('PATCH responds with 404 if non-existent article id is used:', () => request.patch('/api/articles/9000/comments/1')
+      .send({
+        inc_votes: 4,
+      })
+      .expect(404));
+
+    it('PATCH responds with 404 if non-existent comment id is used:', () => request.patch('/api/articles/9/comments/1000')
+      .send({
+        inc_votes: 4,
+      })
+      .expect(404));
+
+    it('PATCH responds with 400 if invalid comment id is used:', () => request.patch('/api/articles/9/comments/banana')
+      .send({
+        inc_votes: 4,
+      })
+      .expect(400));
+
+    it('PATCH responds with 400 if invalid article id is used:', () => request.patch('/api/articles/banana/comments/1')
+      .send({
+        inc_votes: 4,
+      })
+      .expect(400));
 
     it('DELETE status:204 accepts a delete requests and deletes the article from the databse', () => request.delete('/api/articles/9/comments/1')
       .expect(204)
@@ -574,6 +597,12 @@ describe('/api', () => {
       }) => {
         expect(body.comments).to.have.lengthOf(1);
       }));
+
+    it('DELETE responds with 404 if given a non-existent comment_id:', () => request.delete('/api/articles/9/comments/1000')
+      .expect(404));
+
+    it('DELETE responds with 404 if given a non-existent article_id:', () => request.delete('/api/articles/9000/comments/1')
+      .expect(404));
   });
 
   describe('/api/users', () => {

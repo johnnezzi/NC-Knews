@@ -82,14 +82,17 @@ exports.postArticlesToTopic = (req, res, next) => {
 };
 
 exports.patchArticle = (req, res, next) => {
+  const {
+    inc_votes = 0
+  } = req.body;
   connection('articles')
     .where('article_id', '=', req.params.article_id)
-    .increment('votes', req.body.inc_votes).returning('*')
+    .increment('votes', inc_votes).returning('*')
     .then(([article]) => {
-      if (!req.body.inc_votes) return res.status(200).send({
+      if (!inc_votes) return res.status(200).send({
         article,
       });
-      if (Number.isNaN(+req.body.inc_votes)) {
+      if (Number.isNaN(+inc_votes)) {
         return Promise.reject({
           msg: 'no article found',
           code: 400,

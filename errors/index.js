@@ -1,5 +1,4 @@
 exports.handle400 = (err, req, res, next) => {
-  // console.log(err);
   const codes = {
     42703: 'Bad Request, Invalid object structure provided',
     23502: 'Missing mandatory field',
@@ -15,7 +14,6 @@ exports.handle400 = (err, req, res, next) => {
 };
 
 exports.handle404 = (err, req, res, next) => {
-  // console.log(err);
   if (err.code === 404) res.status(404).send({
     message: err.msg || err.message,
   });

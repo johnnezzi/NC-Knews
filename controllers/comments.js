@@ -41,13 +41,27 @@ exports.postCommentToArticle = (req, res, next) => {
 };
 
 exports.patchComment = (req, res, next) => {
+  const { inc_votes = 0 } = req.body;
+  const { comments_id, article_id } = req.params;
   connection('comments')
-    .where('comments_id', '=', req.params.comments_id)
-    .increment('votes', req.body.inc_votes).returning('*')
+    .where({
+      article_id,
+      comments_id,
+    })
+    .increment('votes', inc_votes).returning('*')
     .then(([comment]) => {
-      if (!req.body.inc_votes) {return res.status(200).send({
-        comment,
-      });}
+      if (Number.isNaN(+comments_id) || Number.isNaN(+article_id)) {
+        return Promise.reject({
+          msg: 'no article found',
+          code: 400,
+        });
+      }
+      if (!comment) {
+        return Promise.reject({
+          msg: 'no comment found',
+          code: 404,
+        });
+      }
       res.status(200).send(
         {
           comment,
@@ -58,9 +72,21 @@ exports.patchComment = (req, res, next) => {
 };
 
 exports.deleteComment = (req, res, next) => {
+  const { comments_id, article_id } = req.params;
   connection('comments')
-    .where('comments_id', req.params.comments_id)
+    .where({
+      article_id,
+      comments_id,
+    })
     .del().returning('*')
-    .then(() => res.sendStatus(204))
+    .then(([comment]) => {
+      if (!comment) {
+        return Promise.reject({
+          msg: 'no comment found',
+          code: 404,
+        });
+      }
+      res.sendStatus(204);
+    })
     .catch(next);
 };
