@@ -28,3 +28,4 @@ exports.formatComments = (comments, articles) => comments.map(({
     ...restOfComments,
   };
 });
+

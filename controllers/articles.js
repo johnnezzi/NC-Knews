@@ -1,7 +1,11 @@
 const connection = require('../connection');
+const isEmptyObject = require('../db/utils')
 
 exports.getArticles = (req, res, next) => {
-  const { limit = 10, sort_by = 'created_at', sort_order = 'desc' } = req.query;
+  const allowedSorts = ['article_id', 'title', 'votes', 'topic', 'username'];
+  const { sort_order = 'desc' } = req.query;
+  const limit = Number.isNaN(+req.query.limit) ? 10 : req.query.limit;
+  const sort_by = !allowedSorts.includes(req.query.sort_by) ? 'created_at' : req.query.sort_by;
   const offset = !req.query.p ? 0 : (req.query.p - 1) * limit;
   connection
     .select('articles.article_id', 'articles.title', 'articles.votes', 'articles.topic', 'articles.username as author', 'articles.created_at')
@@ -12,12 +16,16 @@ exports.getArticles = (req, res, next) => {
     .limit(limit)
     .orderBy(sort_by, sort_order)
     .offset(offset)
-    .then(articles => res.status(200).send({ articles }));
+    .then(articles => res.status(200).send({ articles }))
+    .catch(next);
 };
 
 exports.getArticlesByTopic = (req, res, next) => {
-  const { limit = 10, sort_by = 'created_at', sort_order = 'desc' } = req.query;
+  const allowedSorts = ['article_id', 'title', 'votes', 'topic', 'username', 'created_at'];
+  const { sort_order = 'desc' } = req.query;
+  const limit = Number.isNaN(+req.query.limit) ? 10 : req.query.limit;
   const offset = !req.query.p ? 0 : (req.query.p - 1) * limit;
+  const sort_by = !allowedSorts.includes(req.query.sort_by) ? 'created_at' : req.query.sort_by;
   connection
     .select('articles.article_id', 'articles.title', 'articles.votes', 'articles.topic', 'articles.username as author', 'articles.created_at')
     .from('articles')
@@ -49,8 +57,8 @@ exports.getArticleById = (req, res, next) => {
     .count('comments.comments_id as comment_count')
     .groupBy('articles.article_id')
     // \\ if no articles promise.reject
-    .then((article) => {
-      if (article.length === 0) {
+    .then(([article]) => {
+      if (!article) {
         return Promise.reject({
           code: 404,
           message: 'No article found',
@@ -77,16 +85,33 @@ exports.patchArticle = (req, res, next) => {
   connection('articles')
     .where('article_id', '=', req.params.article_id)
     .increment('votes', req.body.inc_votes).returning('*')
-    .then(([article]) => res.status(202).send({
-      article,
-    }))
+    .then(([article]) => {
+      if (!req.body.inc_votes) return res.status(200).send({
+        article,
+      });
+      if (Number.isNaN(+req.body.inc_votes)) {
+        return Promise.reject({
+          msg: 'no article found',
+          code: 400,
+        });
+      }
+      res.status(200).send({ article });
+    })
     .catch(next);
 };
 
 exports.deleteArticle = (req, res, next) => {
   connection('articles')
     .where('article_id', req.params.article_id)
-    .del().returning('*')
-    .then(() => res.sendStatus(204))
+    .del()
+    .then((delCount) => {
+      if (delCount === 0) {
+        return Promise.reject({
+          msg: 'no article found',
+          code: 404,
+        });
+      }
+      res.status(204).send({});
+    })
     .catch(next);
 };

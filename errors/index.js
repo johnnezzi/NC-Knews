@@ -1,6 +1,11 @@
 exports.handle400 = (err, req, res, next) => {
+  // console.log(err);
   const codes = {
     42703: 'Bad Request, Invalid object structure provided',
+    23502: 'Missing mandatory field',
+    '22P02': 'Invalid input format',
+    400: 'Invalid input format',
+    23503: 'Bad Request, Not found',
   };
   if (codes[err.code]) {
     res.status(400).send({
@@ -10,6 +15,7 @@ exports.handle400 = (err, req, res, next) => {
 };
 
 exports.handle404 = (err, req, res, next) => {
+  // console.log(err);
   if (err.code === 404) res.status(404).send({
     message: err.msg || err.message,
   });
@@ -19,7 +25,6 @@ exports.handle404 = (err, req, res, next) => {
 exports.handle422 = (err, req, res, next) => {
   const codes = {
     23505: 'Bad Request, Duplicate key violation',
-    23503: 'Bad Request, Username does not exist',
   };
   if (codes[err.code]) {
     res.status(422).send({

@@ -13,6 +13,14 @@ describe('/api', () => {
     .then(() => connection.seed.run()));
   after(() => connection.destroy());
 
+  it('GET status:404 responds with error fo a non existent route', () => request.get('/api/nonesense')
+    .expect(404)
+    .then(({
+      body,
+    }) => {
+      expect(body.message).to.eql('Invalid route');
+    }));
+
   describe('/topics', () => {
     it('GET status:200 and responds with an array of topics', () => request.get('/api/topics')
       .expect(200)
@@ -39,6 +47,26 @@ describe('/api', () => {
       .send({
         description: 'The Man Dem',
         snail: 'john',
+      })
+      .expect(400)
+      .then((res) => {
+        expect(res.body.message).to.equal('Bad Request, Invalid object structure provided');
+      }));
+
+    it('POST status:400 if req.body is malformed (key missing)', () => request.post('/api/topics')
+      .send({
+        slug: 'john',
+      })
+      .expect(400)
+      .then((res) => {
+        expect(res.body.message).to.equal('Missing mandatory field');
+      }));
+
+    it('POST status:400 if req.body is malformed (additional key)', () => request.post('/api/topics')
+      .send({
+        description: 'The Man Dem',
+        slug: 'john',
+        random: 'random tings',
       })
       .expect(400)
       .then((res) => {
@@ -105,6 +133,22 @@ describe('/api', () => {
         expect(body.articles[0].article_id).to.eql(1);
       }));
 
+    it('GET status:200 returns default response if given invalid sort_by:', () => request.get('/api/topics/mitch/articles?sort_by=frogs')
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body.articles[0].article_id).to.eql(1);
+      }));
+
+    it('GET status:200 returns default response if given invalid limit:', () => request.get('/api/topics/mitch/articles?limit=frogs')
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body.articles).to.have.lengthOf(10);
+      }));
+
     it('GET status:200 and takes a limt query and responds with appropriate number of articles', () => request.get('/api/topics/mitch/articles?limit=5')
       .expect(200)
       .then(({
@@ -168,17 +212,30 @@ describe('/api', () => {
         expect(body.message).to.eql('Bad Request, Invalid object structure provided');
       }));
 
-    it('POST status:422 and responds with error "Bad Request, Username does not exist" when sent a user not in users table', () => request.post('/api/topics/mitch/articles')
+    it('POST status:404 adding an article to a non-existent topic', () => request.post('/api/topics/john/articles')
+      .send({
+        title: 'poke it out',
+        body: 'Playboy playboy hit me on my face time',
+        username: 'icellusedkars',
+      })
+      .expect(400)
+      .then(({
+        body,
+      }) => {
+        expect(body.message).to.eql('Bad Request, Not found');
+      }));
+
+    it('POST status:400 and responds with error "Bad Request, Invalid value provided" when sent a user not in users table', () => request.post('/api/topics/mitch/articles')
       .send({
         title: 'Living in the shadow of a great man',
         body: 'Playboy playboy hit me on my face time',
         username: 'John',
       })
-      .expect(422)
+      .expect(400)
       .then(({
         body,
       }) => {
-        expect(body.message).to.eql('Bad Request, Username does not exist');
+        expect(body.message).to.eql('Bad Request, Not found');
       }));
   });
 
@@ -200,6 +257,22 @@ describe('/api', () => {
       }) => {
         expect(body.articles).to.have.lengthOf(10);
         expect(body.articles[0].article_id).to.eql(1);
+      }));
+
+    it('GET status:200 returns default response if given invalid sort_by:', () => request.get('/api/articles?sort_by=frogs')
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body.articles[0].article_id).to.eql(1);
+      }));
+
+    it('GET status:200 returns default response if given invalid limit:', () => request.get('/api/articles?limit=frogs')
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body.articles).to.have.lengthOf(10);
       }));
 
     it('GET status:200 and takes a limit query and responds with appropriate number of articles', () => request.get('/api/articles?limit=5')
@@ -261,11 +334,10 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body.article).to.have.lengthOf(1);
-        expect(body.article[0]).to.have.all.keys('article_id', 'author', 'title', 'votes', 'body', 'comment_count', 'created_at', 'topic');
+        expect(body.article).to.have.all.keys('article_id', 'author', 'title', 'votes', 'body', 'comment_count', 'created_at', 'topic');
       }));
 
-    it('GET status:404 responds with "No article found" when sent invalid article_id ', () => request.get('/api/articles/400')
+    it('GET status:404 responds with "No article found" when sent invalid article_id format', () => request.get('/api/articles/400')
       .expect(404)
       .then(({
         body,
@@ -273,21 +345,61 @@ describe('/api', () => {
         expect(body.message).to.eql('No article found');
       }));
 
-    it('PATCH status:202 accepts a patch requests and amends the database accordingly', () => request.patch('/api/articles/1')
+    it('GET status:404 responds with "No article found" when sent invalid article_id ', () => request.get('/api/articles/banana')
+      .expect(400)
+      .then(({
+        body,
+      }) => {
+        expect(body.message).to.eql('Invalid input format');
+      }));
+
+    it('PATCH status:200 accepts a patch requests and amends the database accordingly', () => request.patch('/api/articles/1')
       .send({
         inc_votes: 3,
       })
-      .expect(202)
+      .expect(200)
       .then(({
         body,
       }) => {
         expect(body.article.votes).to.eql(103);
       }));
 
+    it('PATCH status:400 responds with error when invalid data type sent', () => request.patch('/api/articles/1')
+      .send({
+        inc_votes: 'banana',
+      })
+      .expect(400)
+      .then(({
+        body,
+      }) => {
+        expect(body.message).to.eql('Invalid input format');
+      }));
+
+    it('PATCH status:200s no body responds with an unmodified article', () => request.patch('/api/articles/1')
+      .send()
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body.message).to.eql('Invalid input format');
+      }));
+
     it('DELETE status:204 accepts a delete requests and deletes the article from the databse', () => request.delete('/api/articles/2')
       .expect(204)
       .then(() => request.get('/api/articles/2')
         .expect(404)));
+
+    it('DELETE status:404 when given a non-existent article_id ', () => request.delete('/api/articles/200')
+      .expect(404)
+      .then((res) => {
+        expect(res.body.message).to.equal('no article found');
+      }));
+
+    it('DELETE status:404 when given a invalid article_id ', () => request.delete('/api/articles/banana')
+      .expect(400)
+      .then((res) => {
+        expect(res.body.message).to.equal('Invalid input format');
+      }));
 
     it('PUT status:405 and responds with "Invalid method for this endpoint" ', () => request.put('/api/articles/2')
       .expect(405)
@@ -315,6 +427,14 @@ describe('/api', () => {
         expect(body.message).to.eql('no article found');
       }));
 
+    it('GET responds with 400 for an invalid article_id:', () => request.get('/api/articles/banana/comments')
+      .expect(400)
+      .then(({
+        body,
+      }) => {
+        expect(body.message).to.eql('Invalid input format');
+      }));
+
     it('GET status:200 and responds with default settings of limit=10, sort_by=date,order=desc', () => request.get('/api/articles/1/comments')
       .expect(200)
       .then(({
@@ -324,7 +444,23 @@ describe('/api', () => {
         expect(body.comments[0].comments_id).to.eql(2);
       }));
 
-    it('GET status:200 and takes a limt query and responds with appropriate number of articles', () => request.get('/api/articles/1/comments?limit=5')
+    it('GET status:200 returns default response if given invalid sort_by:', () => request.get('/api/articles/1/comments?sort_by=frogs')
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body.comments[0].comments_id).to.eql(2);
+      }));
+
+    it('GET status:200 returns default response if given invalid limit:', () => request.get('/api/articles/1/comments?limit=frogs')
+      .expect(200)
+      .then(({
+        body,
+      }) => {
+        expect(body.comments).to.have.lengthOf(10);
+      }));
+
+    it('GET status:200 and takes a limit query and responds with appropriate number of articles', () => request.get('/api/articles/1/comments?limit=5')
       .expect(200)
       .then(({
         body,
@@ -371,28 +507,65 @@ describe('/api', () => {
         expect(body.comment).to.have.all.keys('username', 'body', 'article_id', 'comments_id', 'created_at', 'votes');
       }));
 
-    it('POST status:422 when adding a comment with an invalid username', () => request.post('/api/articles/9/comments')
+    it('POST status:400 when adding a comment with an invalid username', () => request.post('/api/articles/9/comments')
       .send({
-        username: 'John',
+        username: 'john',
         body: 'Im a social commententator',
       })
-      .expect(422)
+      .expect(400)
       .then(({
         body,
       }) => {
-        expect(body.message).to.eql('Bad Request, Username does not exist');
+        expect(body.message).to.eql('Bad Request, Not found');
       }));
 
-    it('PATCH status:202 accepts a patch requests and amends the database accordingly', () => request.patch('/api/articles/9/comments/1')
+    it('POST status:400 when adding a comment with an invalid article id', () => request.post('/api/articles/banana/comments')
+      .send({
+        username: 'icellusedkars',
+        body: 'Im a social commententator',
+      })
+      .expect(400)
+      .then(({
+        body,
+      }) => {
+        expect(body.message).to.eql('Invalid input format');
+      }));
+
+    // it.only('POST status:400 when adding a comment with an invalid article id', () => request.post('/api/articles/9/comments')
+    //   .send({
+    //     username: 'icellusedkars',
+    //    dockey: 'monckey',
+        
+    //   })
+    //   .expect(400)
+    //   .then(({
+    //     body,
+    //   }) => {
+    //     expect(body.message).to.eql('Invalid input format');
+    //   }));
+
+    it('PATCH status:200 accepts a patch requests and amends the database accordingly', () => request.patch('/api/articles/9/comments/1')
       .send({
         inc_votes: 4,
       })
-      .expect(202)
+      .expect(200)
       .then(({
         body,
       }) => {
         expect(body.comment.votes).to.eql(20);
       }));
+
+    // it.only('PATCH responds with 404 if non-existent comment id is used:', () => request.patch('/api/articles/9/comments/1000')
+    //   .send({
+    //     inc_votes: 4,
+    //   })
+    //   .expect(200)
+    //   .then(({
+    //     body,
+    //   }) => {
+    //     expect(body.comment.votes).to.eql(20);
+    //   }));
+
     it('DELETE status:204 accepts a delete requests and deletes the article from the databse', () => request.delete('/api/articles/9/comments/1')
       .expect(204)
       .then(() => request.get('/api/articles/9/comments'))
