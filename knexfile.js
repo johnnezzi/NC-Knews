@@ -1,3 +1,7 @@
+const {
+  DB_URL,
+} = process.env;
+
 module.exports = {
   development: {
     client: 'pg',
@@ -21,6 +25,16 @@ module.exports = {
     },
     seeds: {
       directory: './db/seed',
+    },
+  },
+  production: {
+    client: 'pg',
+    connection: `${DB_URL}?ssl=true`,
+    migrations: {
+      directory: './seed/migrations/',
+    },
+    seeds: {
+      directory: './seed',
     },
   },
 };
