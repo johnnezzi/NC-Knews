@@ -31,10 +31,10 @@ module.exports = {
     client: 'pg',
     connection: `${DB_URL}?ssl=true`,
     migrations: {
-      directory: './seed/migrations/',
+      directory: './db/migrations/',
     },
     seeds: {
-      directory: './seed',
+      directory: './db/seed',
     },
   },
 };

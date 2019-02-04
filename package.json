@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node listen.js",
-    "test": "mocha ./spec/app.spec.js",
+    "test": " mocha ./spec/app.spec.js",
     "lint": "eslint ./",
     "pre-commit": "npm t",
     "posttest": "npm run lint",
@@ -33,6 +33,7 @@
   "dependencies": {
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
+    "cors": "^2.8.5",
     "express": "^4.16.4",
     "knex": "^0.15.2",
     "mocha": "^5.2.0",

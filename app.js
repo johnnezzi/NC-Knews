@@ -4,6 +4,9 @@ const bodyParser = require('body-parser');
 const {
   handle400, handle404, handle422, handle500,
 } = require('./errors');
+const cors = require('cors');
+
+app.use(cors());
 
 app.use(bodyParser.json());
 
