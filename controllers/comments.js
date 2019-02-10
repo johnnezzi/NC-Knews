@@ -3,7 +3,7 @@ const connection = require('../connection');
 exports.getCommentsByArticle = (req, res, next) => {
   const allowedSorts = ['article_id', 'title', 'votes', 'topic', 'username', 'created_at', 'comments_id'];
   const { sort_order = 'desc' } = req.query;
-  const limit = Number.isNaN(+req.query.limit) ? 10 : req.query.limit;
+  const limit = Number.isNaN(+req.query.limit) ? 1000 : req.query.limit;
   const sort_by = !allowedSorts.includes(req.query.sort_by) ? 'created_at' : req.query.sort_by;
   const offset = !req.query.p ? 0 : (req.query.p - 1) * limit;
   connection

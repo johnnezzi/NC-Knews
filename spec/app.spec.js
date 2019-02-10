@@ -129,7 +129,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body.articles).to.have.lengthOf(10);
+        expect(body.articles).to.have.lengthOf(11);
         expect(body.articles[0].article_id).to.eql(1);
       }));
 
@@ -146,7 +146,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body.articles).to.have.lengthOf(10);
+        expect(body.articles).to.have.lengthOf(11);
       }));
 
     it('GET status:200 and takes a limt query and responds with appropriate number of articles', () => request.get('/api/topics/mitch/articles?limit=5')
@@ -165,13 +165,13 @@ describe('/api', () => {
         expect(body.articles[0].article_id).to.eql(12);
       }));
 
-    it('GET status:200 and takes a p query and responds articles paginated by that query', () => request.get('/api/topics/mitch/articles?p=2')
+    it('GET status:200 and takes a p query and responds articles paginated by that query', () => request.get('/api/topics/mitch/articles?p=1')
       .expect(200)
       .then(({
         body,
       }) => {
-        expect(body.articles[0].article_id).to.eql(12);
-        expect(body.articles).to.have.lengthOf(1);
+        expect(body.articles[0].article_id).to.eql(1);
+        expect(body.articles).to.have.lengthOf(11);
       }));
 
     it('GET status:200 and takes a order query and responds articles ordered by that query', () => request.get('/api/topics/mitch/articles?sort_order=asc')
@@ -245,7 +245,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body.articles).to.have.lengthOf(10);
+        expect(body.articles).to.have.lengthOf(12);
         expect(body.articles[0].title).to.eql('Living in the shadow of a great man');
         expect(body.articles[0]).to.have.all.keys('author', 'title', 'article_id', 'votes', 'comment_count', 'created_at', 'topic');
       }));
@@ -255,7 +255,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body.articles).to.have.lengthOf(10);
+        expect(body.articles).to.have.lengthOf(12);
         expect(body.articles[0].article_id).to.eql(1);
       }));
 
@@ -272,7 +272,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body.articles).to.have.lengthOf(10);
+        expect(body.articles).to.have.lengthOf(12);
       }));
 
     it('GET status:200 and takes a limit query and responds with appropriate number of articles', () => request.get('/api/articles?limit=5')
@@ -291,13 +291,13 @@ describe('/api', () => {
         expect(body.articles[0].article_id).to.eql(12);
       }));
 
-    it('GET status:200 and takes a p query and responds articles paginated by that query', () => request.get('/api/articles?p=2')
+    it('GET status:200 and takes a p query and responds articles paginated by that query', () => request.get('/api/articles?p=1')
       .expect(200)
       .then(({
         body,
       }) => {
-        expect(body.articles[0].article_id).to.eql(11);
-        expect(body.articles).to.have.lengthOf(2);
+        expect(body.articles[0].article_id).to.eql(1);
+        expect(body.articles).to.have.lengthOf(12);
       }));
 
     it('GET status:200 and takes a order query and responds articles ordered by that query', () => request.get('/api/articles?sort_order=asc')
@@ -441,7 +441,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body.comments).to.have.lengthOf(10);
+        expect(body.comments).to.have.lengthOf(13);
         expect(body.comments[0].comments_id).to.eql(2);
       }));
 
@@ -458,7 +458,7 @@ describe('/api', () => {
       .then(({
         body,
       }) => {
-        expect(body.comments).to.have.lengthOf(10);
+        expect(body.comments).to.have.lengthOf(13);
       }));
 
     it('GET status:200 and takes a limit query and responds with appropriate number of articles', () => request.get('/api/articles/1/comments?limit=5')
@@ -477,13 +477,13 @@ describe('/api', () => {
         expect(body.comments[0].comments_id).to.eql(18);
       }));
 
-    it('GET status:200 and takes a p query and responds articles paginated by that query', () => request.get('/api/articles/1/comments?p=2')
+    it('GET status:200 and takes a p query and responds articles paginated by that query', () => request.get('/api/articles/1/comments?p=1')
       .expect(200)
       .then(({
         body,
       }) => {
-        expect(body.comments[0].comments_id).to.eql(12);
-        expect(body.comments).to.have.lengthOf(3);
+        expect(body.comments[0].comments_id).to.eql(2);
+        expect(body.comments).to.have.lengthOf(13);
       }));
 
     it('GET status:200 and takes a order query and responds articles ordered by that query', () => request.get('/api/articles/1/comments?sort_order=asc')

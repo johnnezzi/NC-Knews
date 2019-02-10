@@ -1,10 +1,9 @@
 const connection = require('../connection');
-const isEmptyObject = require('../db/utils')
 
 exports.getArticles = (req, res, next) => {
   const allowedSorts = ['article_id', 'title', 'votes', 'topic', 'username'];
   const { sort_order = 'desc' } = req.query;
-  const limit = Number.isNaN(+req.query.limit) ? 10 : req.query.limit;
+  const limit = Number.isNaN(+req.query.limit) ? 1000 : req.query.limit;
   const sort_by = !allowedSorts.includes(req.query.sort_by) ? 'created_at' : req.query.sort_by;
   const offset = !req.query.p ? 0 : (req.query.p - 1) * limit;
   connection
@@ -23,7 +22,7 @@ exports.getArticles = (req, res, next) => {
 exports.getArticlesByTopic = (req, res, next) => {
   const allowedSorts = ['article_id', 'title', 'votes', 'topic', 'username', 'created_at'];
   const { sort_order = 'desc' } = req.query;
-  const limit = Number.isNaN(+req.query.limit) ? 10 : req.query.limit;
+  const limit = Number.isNaN(+req.query.limit) ? 1000 : req.query.limit;
   const offset = !req.query.p ? 0 : (req.query.p - 1) * limit;
   const sort_by = !allowedSorts.includes(req.query.sort_by) ? 'created_at' : req.query.sort_by;
   connection
@@ -108,6 +107,7 @@ exports.deleteArticle = (req, res, next) => {
     .where('article_id', req.params.article_id)
     .del()
     .then((delCount) => {
+      console.log(delCount)
       if (delCount === 0) {
         return Promise.reject({
           msg: 'no article found',
