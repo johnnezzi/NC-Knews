@@ -107,7 +107,6 @@ exports.deleteArticle = (req, res, next) => {
     .where('article_id', req.params.article_id)
     .del()
     .then((delCount) => {
-      console.log(delCount)
       if (delCount === 0) {
         return Promise.reject({
           msg: 'no article found',
