@@ -79,7 +79,9 @@ exports.deleteComment = (req, res, next) => {
       comments_id,
     })
     .del().returning('*')
-    .then(([comment]) => {
+    .then((res) => {
+      console.log(res)
+      const [comment] = res
       if (!comment) {
         return Promise.reject({
           msg: 'no comment found',
