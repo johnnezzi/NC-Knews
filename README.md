@@ -109,7 +109,7 @@ To run tests make sure you are in test mode in the command line
 
 ## Deployment
 
-Hosted on [Heroku](add heroku link for the app)
+Hosted on [Heroku](https://jncnews.herokuapp.com/api)
 
 ## Built With
 
@@ -119,8 +119,6 @@ Hosted on [Heroku](add heroku link for the app)
 - PostgreSQL - Relational database
 
 ## Endpoints
-
-Your server should have the following end-points:
 
 ```http
 GET /api/topics
