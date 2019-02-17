@@ -16,8 +16,8 @@ This is a guide to help you get set up with the API so that you can use it local
 First cd into the location that you want to store the file and run the following commands in your terminal.
 
 ```http
-git clone https://github.com/johnnezzi/BE2-NC-Knews
-cd BE2-NC-Knews
+git clone https://github.com/johnnezzi/NC-Knews
+cd NC-Knews
 npm install
 ```
 
