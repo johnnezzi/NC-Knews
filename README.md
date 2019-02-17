@@ -226,7 +226,7 @@ GET /api/articles/:article_id/comments
 
 - responds with an array of comments for the given `article_id`
 - each comment should have
-  - `comment_id`
+  - `comments_id`
   - `votes`
   - `created_at`
   - `author` which is the `username` from the users table
